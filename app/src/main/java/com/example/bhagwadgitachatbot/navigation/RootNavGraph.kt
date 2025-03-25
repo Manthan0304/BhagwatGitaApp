@@ -4,18 +4,22 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.bhagwadgitachatbot.LocationScreen
 import com.example.bhagwadgitachatbot.screens.ChatScreen
 import com.example.bhagwadgitachatbot.screens.LoginScreen
 import com.example.homescreenbg.MainScreen
+import com.example.bhagwadgitachatbot.ChatViewModel
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun RootNavGraph(
     navController: NavHostController,
-    onSignInClick: () -> Unit
+    onSignInClick: () -> Unit,
+    chatViewModel: ChatViewModel
 ) {
     NavHost(
         navController = navController,
@@ -27,10 +31,23 @@ fun RootNavGraph(
             )
         }
         composable("home") {
-            MainScreen(navController)
+            MainScreen(navController, chatViewModel)
         }
-        composable("chat") {
-            ChatScreen(navController)
+        composable(
+            route = "chat?chatId={chatId}",
+            arguments = listOf(
+                navArgument("chatId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getInt("chatId")
+            ChatScreen(
+                navController = navController,
+                chatId = if (chatId == -1) null else chatId,
+                viewModel = chatViewModel
+            )
         }
         composable("location") {
             LocationScreen(navController)

@@ -7,23 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -34,35 +18,21 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.bhagwadgitachatbot.api.ChatRequest
 import com.example.bhagwadgitachatbot.api.RetrofitInstance
+import com.example.bhagwadgitachatbot.database.ChatViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 private const val TAG = "ChatScreen"
@@ -70,35 +40,41 @@ private const val TAG = "ChatScreen"
 data class ChatMessage(
     val content: String,
     val isUser: Boolean,
-    val id: String = java.util.UUID.randomUUID().toString() // Add unique ID for each message
+    val id: String = java.util.UUID.randomUUID().toString()
 )
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(navController: NavHostController) {
+fun ChatScreen(
+    navController: NavHostController,
+    chatId: Int? = null,
+    viewModel: ChatViewModel
+) {
+    val context = LocalContext.current
     var userInput by remember { mutableStateOf("") }
-    val chatMessages = remember { mutableStateListOf<ChatMessage>() }
-    val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    
+    // Collect messages from ViewModel
+    val messages by viewModel.currentChatMessages.collectAsState()
+    val currentChatId by viewModel.currentChatId.collectAsState()
 
-    // Add initial message
-    LaunchedEffect(Unit) {
-        if (chatMessages.isEmpty()) {
-            chatMessages.add(
-                ChatMessage(
-                    "Hello! I'm your Bhagavad Gita assistant. How can I help you today?",
-                    isUser = false
-                )
-            )
+    // Initialize chat and load messages
+    LaunchedEffect(chatId) {
+        if (chatId != null) {
+            // Load existing chat
+            viewModel.loadChat(chatId)
+        } else if (currentChatId == null) {
+            // Only create new chat if we don't have a current chat ID
+            viewModel.createNewChat("Hello! I'm your Bhagavad Gita assistant. How can I help you today?")
         }
     }
 
     // Scroll to bottom when new message is added
-    LaunchedEffect(chatMessages.size) {
-        if (chatMessages.isNotEmpty()) {
-            listState.animateScrollToItem(chatMessages.size - 1)
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
         }
     }
 
@@ -123,9 +99,7 @@ fun ChatScreen(navController: NavHostController) {
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF1E1E1E)
-                ),
-                modifier = Modifier.systemBarsPadding() // Add this line to keep TopAppBar fixed
-                     .windowInsetsPadding(WindowInsets.systemBars) // Add this line
+                )
             )
         }
     ) { paddingValues ->
@@ -134,8 +108,7 @@ fun ChatScreen(navController: NavHostController) {
                 .fillMaxSize()
                 .background(Color(0xFF1E1E1E))
                 .padding(paddingValues)
-                .imePadding() // Add this modifier
-
+                .imePadding()
         ) {
             // Chat messages
             Box(
@@ -152,8 +125,8 @@ fun ChatScreen(navController: NavHostController) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(
-                        items = chatMessages,
-                        key = { it.id } // Use unique ID as key for better recomposition
+                        items = messages,
+                        key = { it.id }
                     ) { message ->
                         ChatMessageItem(message = message)
                     }
@@ -214,51 +187,13 @@ fun ChatScreen(navController: NavHostController) {
                     keyboardActions = KeyboardActions(
                         onSend = {
                             if (userInput.isNotBlank() && !isLoading) {
-                                val currentInput = userInput
-                                userInput = ""
-                                isLoading = true
-
-                                Log.d(TAG, "Sending message: $currentInput")
-                                chatMessages.add(ChatMessage(currentInput, true))
-
                                 coroutineScope.launch {
-                                    try {
-                                        Log.d(TAG, "Making API request with query: $currentInput")
-                                        val response = RetrofitInstance.api.getChatResponse(
-                                            ChatRequest(
-                                                query = currentInput,
-                                                num_verses = 3
-                                            )
-                                        )
-
-                                        Log.d(TAG, "API response received: ${response.isSuccessful}")
-                                        if (response.isSuccessful) {
-                                            val chatResponse = response.body()
-                                            Log.d(TAG, "Response body: $chatResponse")
-
-                                            if (chatResponse != null) {
-                                                val formattedResponse = buildString {
-                                                    append(chatResponse.response)
-                                                    append("\n\nRelevant Verses:\n")
-                                                    chatResponse.relevant_verses.forEach { verse ->
-                                                        append("\n${verse.verse_number}:\n${verse.translation_in_english}\n")
-                                                    }
-                                                }
-                                                chatMessages.add(ChatMessage(formattedResponse, false))
-                                            } else {
-                                                Log.e(TAG, "Response body is null")
-                                                chatMessages.add(ChatMessage("Sorry, I couldn't process that response.", false))
-                                            }
-                                        } else {
-                                            Log.e(TAG, "API request failed: ${response.code()} - ${response.message()}")
-                                            chatMessages.add(ChatMessage("Sorry, there was an error processing your request. Please try again.", false))
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.e(TAG, "Exception during API call", e)
-                                        chatMessages.add(ChatMessage("Sorry, there was a network error. Please check your connection and try again.", false))
-                                    } finally {
-                                        isLoading = false
-                                    }
+                                    handleMessage(
+                                        message = userInput,
+                                        viewModel = viewModel,
+                                        setLoading = { isLoading = it }
+                                    )
+                                    userInput = ""
                                 }
                             }
                         }
@@ -271,51 +206,13 @@ fun ChatScreen(navController: NavHostController) {
                 IconButton(
                     onClick = {
                         if (userInput.isNotBlank() && !isLoading) {
-                            val currentInput = userInput
-                            userInput = ""
-                            isLoading = true
-
-                            Log.d(TAG, "Sending message: $currentInput")
-                            chatMessages.add(ChatMessage(currentInput, true))
-
                             coroutineScope.launch {
-                                try {
-                                    Log.d(TAG, "Making API request with query: $currentInput")
-                                    val response = RetrofitInstance.api.getChatResponse(
-                                        ChatRequest(
-                                            query = currentInput,
-                                            num_verses = 3
-                                        )
-                                    )
-
-                                    Log.d(TAG, "API response received: ${response.isSuccessful}")
-                                    if (response.isSuccessful) {
-                                        val chatResponse = response.body()
-                                        Log.d(TAG, "Response body: $chatResponse")
-
-                                        if (chatResponse != null) {
-                                            val formattedResponse = buildString {
-                                                append(chatResponse.response)
-                                                append("\n\nRelevant Verses:\n")
-                                                chatResponse.relevant_verses.forEach { verse ->
-                                                    append("\n${verse.verse_number}:\n${verse.translation_in_english}\n")
-                                                }
-                                            }
-                                            chatMessages.add(ChatMessage(formattedResponse, false))
-                                        } else {
-                                            Log.e(TAG, "Response body is null")
-                                            chatMessages.add(ChatMessage("Sorry, I couldn't process that response.", false))
-                                        }
-                                    } else {
-                                        Log.e(TAG, "API request failed: ${response.code()} - ${response.message()}")
-                                        chatMessages.add(ChatMessage("Sorry, there was an error processing your request. Please try again.", false))
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "Exception during API call", e)
-                                    chatMessages.add(ChatMessage("Sorry, there was a network error. Please check your connection and try again.", false))
-                                } finally {
-                                    isLoading = false
-                                }
+                                handleMessage(
+                                    message = userInput,
+                                    viewModel = viewModel,
+                                    setLoading = { isLoading = it }
+                                )
+                                userInput = ""
                             }
                         }
                     },
@@ -346,6 +243,62 @@ fun ChatScreen(navController: NavHostController) {
     }
 }
 
+private suspend fun handleMessage(
+    message: String,
+    viewModel: ChatViewModel,
+    setLoading: (Boolean) -> Unit
+) {
+    if (message.isBlank()) return
+    
+    // Create and save user message
+    val userMessage = ChatMessage(message, true)
+    viewModel.saveMessage(userMessage)
+    setLoading(true)
+
+    try {
+        Log.d(TAG, "Making API request with query: $message")
+        val response = RetrofitInstance.api.getChatResponse(
+            ChatRequest(
+                query = message,
+                num_verses = 3
+            )
+        )
+        
+        Log.d(TAG, "API response received: ${response.isSuccessful}")
+        if (response.isSuccessful) {
+            val chatResponse = response.body()
+            Log.d(TAG, "Response body: $chatResponse")
+            
+            if (chatResponse != null) {
+                val formattedResponse = buildString {
+                    append(chatResponse.response)
+                    append("\n\nRelevant Verses:\n")
+                    chatResponse.relevant_verses.forEach { verse ->
+                        append("\n${verse.verse_number}:\n${verse.translation_in_english}\n")
+                    }
+                }
+                val assistantMessage = ChatMessage(formattedResponse, false)
+                viewModel.saveMessage(assistantMessage)
+            } else {
+                Log.e(TAG, "Response body is null")
+                val errorMessage = ChatMessage("Sorry, I couldn't process that response.", false)
+                viewModel.saveMessage(errorMessage)
+            }
+        } else {
+            Log.e(TAG, "API request failed: ${response.code()} - ${response.message()}")
+            val errorMessage = ChatMessage("Sorry, there was an error processing your request. Please try again.", false)
+            viewModel.saveMessage(errorMessage)
+        }
+    } catch (e: Exception) {
+        Log.e(TAG, "Exception during API call", e)
+        val errorMessage = ChatMessage("Sorry, there was a network error. Please check your connection and try again.", false)
+        viewModel.saveMessage(errorMessage)
+    } finally {
+        setLoading(false)
+    }
+}
+
+// Existing ChatMessageItem remains unchanged
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
     AnimatedVisibility(

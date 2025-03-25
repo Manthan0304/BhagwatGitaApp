@@ -1,1 +1,47 @@
-
+{
+  "project_info": {
+    "project_number": "269258198486",
+    "project_id": "bhagwadgitachatbot",
+    "storage_bucket": "bhagwadgitachatbot.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269258198486:android:ad560e8eba45eb6da16877",
+        "android_client_info": {
+          "package_name": "com.example.bhagwadgitachatbot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269258198486-m798j6n8mf3nlg593og1o1sett302dg7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bhagwadgitachatbot",
+            "certificate_hash": "f7e6aaf38c096c879940d14ef53e48791710477f"
+          }
+        },
+        {
+          "client_id": "269258198486-1qin5vjpf68cj64t00u0u0nkcfubgfq2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDw7_nLKTmylhhTpsJkBKLgYO2RImUjpOY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269258198486-1qin5vjpf68cj64t00u0u0nkcfubgfq2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

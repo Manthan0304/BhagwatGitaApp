@@ -33,15 +33,16 @@ import com.google.firebase.firestore.FirebaseFirestore
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import com.example.bhagwadgitachatbot.ui.theme.customFont
+import com.example.bhagwadgitachatbot.database.ChatEntity
+import com.example.bhagwadgitachatbot.database.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavHostController, chatViewModel: ChatViewModel) {
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
-    val viewModel: chatviewmodel = viewModel()
-    var username by remember { mutableStateOf("User") }
     val context = LocalContext.current
+    val chats by chatViewModel.chatsState.collectAsState()
 
     // Create ImageLoader for GIF support
     val imageLoader = ImageLoader.Builder(context)
@@ -50,19 +51,19 @@ fun HomeScreen(navController: NavHostController) {
         }
         .build()
 
-    // Fetch username from Firestore using viewModel state
-    val userData by viewModel.state.collectAsState()
-
     LaunchedEffect(auth.currentUser?.uid) {
         auth.currentUser?.uid?.let { userId ->
-            viewModel.getUserData(userId)
+            // You can add any user-specific initialization here if needed
         }
     }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate("chat") },
+                onClick = {
+                    chatViewModel.createNewChat("New Conversation")
+                    navController.navigate("chat")
+                },
                 containerColor = Color(0xFFFFD700),
                 contentColor = Color.Black,
                 shape = RoundedCornerShape(16.dp),
@@ -108,11 +109,10 @@ fun HomeScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                val recentChats = listOf("Chat 2", "Chat 3", "Chat 4")
                 LazyColumn {
-                    items(recentChats) { chatName ->
-                        ChatCard(chatName = chatName) {
-                            navController.navigate("chat")
+                    items(chats) { chat ->
+                        ChatCard(chat = chat) {
+                            navController.navigate("chat?chatId=${chat.id}")
                         }
                     }
                 }
@@ -122,7 +122,7 @@ fun HomeScreen(navController: NavHostController) {
 }
 
 @Composable
-fun ChatCard(chatName: String, onClick: () -> Unit) {
+fun ChatCard(chat: ChatEntity, onClick: () -> Unit) {
     val galaxyGradient = Brush.linearGradient(
         colors = listOf(
             Color(0xFF002147), // Deep Blue
@@ -141,32 +141,41 @@ fun ChatCard(chatName: String, onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(2.dp, Color.White) // Adds white outline
+        border = BorderStroke(2.dp, Color.White)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(galaxyGradient) // Apply Gradient Background
+                .background(galaxyGradient)
                 .padding(start = 20.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.bgremoved), // Your Image
+                painter = painterResource(id = R.drawable.bgremoved),
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxSize() // Ensures the image fills the Box
-                    .alpha(0.3f), // Adjust Transparency if Needed
-                contentScale = ContentScale.Crop // Stretches the image to fit
+                    .fillMaxSize()
+                    .alpha(0.3f),
+                contentScale = ContentScale.Crop
             )
 
-            Text(
-                text = chatName,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                fontFamily = customFont,
+            Column(
                 modifier = Modifier.align(Alignment.CenterStart)
-            )
+            ) {
+                Text(
+                    text = "Chat ${chat.id}",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontFamily = customFont
+                )
+                Text(
+                    text = chat.lastMessage,
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontFamily = customFont,
+                    maxLines = 1
+                )
+            }
         }
     }
 }
-
