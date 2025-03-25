@@ -38,9 +38,10 @@ import com.example.bhagwadgitachatbot.database.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController, chatViewModel: ChatViewModel) {
+fun HomeScreen(navController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
+    val chatViewModel: ChatViewModel = viewModel()
     val context = LocalContext.current
     val chats by chatViewModel.chatsState.collectAsState()
 

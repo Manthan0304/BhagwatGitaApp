@@ -47,9 +47,9 @@ data class ChatMessage(
 @Composable
 fun ChatScreen(
     navController: NavHostController,
-    chatId: Int? = null,
-    viewModel: ChatViewModel
+    chatId: Int? = null
 ) {
+    val viewModel: ChatViewModel = viewModel()
     val context = LocalContext.current
     var userInput by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }

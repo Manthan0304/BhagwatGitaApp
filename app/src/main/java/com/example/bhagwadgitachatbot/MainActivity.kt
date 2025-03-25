@@ -31,7 +31,6 @@ import com.google.firebase.ktx.Firebase
 
 class MainActivity : ComponentActivity() {
     private val viewModel: chatviewmodel by viewModels()
-    private val chatViewModel: ChatViewModel by viewModels()
     private val googleauthuiclient by lazy {
         googleauthuiclient(
             context = applicationContext,
@@ -101,8 +100,7 @@ class MainActivity : ComponentActivity() {
                                 ).build()
                             )
                         }
-                    },
-                    chatViewModel = chatViewModel
+                    }
                 )
             }
         }

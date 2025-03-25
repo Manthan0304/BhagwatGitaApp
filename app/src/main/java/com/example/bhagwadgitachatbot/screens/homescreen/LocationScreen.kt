@@ -28,6 +28,8 @@ import coil.request.ImageRequest
 import com.example.bhagwadgitachatbot.ui.components.DynamicText
 import com.example.bhagwadgitachatbot.ui.theme.customFont
 import com.google.firebase.auth.FirebaseAuth
+import com.example.bhagwadgitachatbot.viewmodel.SettingsViewModel
+import com.example.bhagwadgitachatbot.viewmodel.SettingsViewModelFactory
 
 //
 //@Composable
@@ -104,12 +106,39 @@ fun LocationScreen(navController: NavHostController) {
     val viewModel: chatviewmodel = viewModel()
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(context.applicationContext)
+    )
 
     // State for settings
     var isDarkMode by remember { mutableStateOf(false) }
     var fontSize by remember { mutableStateOf(16f) }
     var selectedLanguage by remember { mutableStateOf("English") }
     var notificationsEnabled by remember { mutableStateOf(true) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Clear All Chats") },
+            text = { Text("Are you sure you want to delete all chats? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        settingsViewModel.clearAllChats()
+                        showConfirmDialog = false
+                    }
+                ) {
+                    Text("Clear", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -117,7 +146,7 @@ fun LocationScreen(navController: NavHostController) {
                 ImageRequest.Builder(context)
                     .data(R.drawable.galaxy)
                     .crossfade(true)
-                    .decoderFactory { result, options, _ -> ImageDecoderDecoder(result.source, options) } // Use ImageDecoderDecoder
+                    .decoderFactory { result, options, _ -> ImageDecoderDecoder(result.source, options) }
                     .build()
             ),
             contentDescription = null,
@@ -270,6 +299,30 @@ fun LocationScreen(navController: NavHostController) {
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Clear All Chats Card
+                    SettingCard(
+                        title = "Danger Zone",
+                        icon = Icons.Default.Delete
+                    ) {
+                        Button(
+                            onClick = { showConfirmDialog = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFE53935) // Red color
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Clear All Chats", color = Color.White)
+                        }
+                        
+                        Text(
+                            text = "This will permanently delete all your chat history",
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontFamily = customFont,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -299,7 +352,6 @@ fun LocationScreen(navController: NavHostController) {
                         )
 
                         Spacer(modifier = Modifier.height(40.dp))
-
                     }
 
                     Spacer(modifier = Modifier.height(50.dp))

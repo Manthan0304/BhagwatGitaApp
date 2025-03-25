@@ -1,4 +1,7 @@
 package com.example.bhagwadgitachatbot
+import android.app.Application
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +26,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.bhagwadgitachatbot.database.ChatViewModel
 import com.example.homescreenbg.SettingsScreen
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun MainNavGraph(
     navController: NavHostController,
@@ -35,7 +40,9 @@ fun MainNavGraph(
         startDestination = BottomNav.Screen1.route
     ) {
         composable(BottomNav.Screen1.route) {
-            HomeScreen(navController = rootNavController)  // Use rootNavController for chat navigation
+            HomeScreen(
+                navController = rootNavController
+            )  // Use rootNavController for chat navigation
         }
         composable(BottomNav.Screen2.route) {
             LocationScreen(navController = rootNavController)  // Use rootNavController for sign out

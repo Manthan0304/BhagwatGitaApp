@@ -12,14 +12,12 @@ import com.example.bhagwadgitachatbot.LocationScreen
 import com.example.bhagwadgitachatbot.screens.ChatScreen
 import com.example.bhagwadgitachatbot.screens.LoginScreen
 import com.example.homescreenbg.MainScreen
-import com.example.bhagwadgitachatbot.ChatViewModel
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun RootNavGraph(
     navController: NavHostController,
-    onSignInClick: () -> Unit,
-    chatViewModel: ChatViewModel
+    onSignInClick: () -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -31,7 +29,7 @@ fun RootNavGraph(
             )
         }
         composable("home") {
-            MainScreen(navController, chatViewModel)
+            MainScreen(navController)
         }
         composable(
             route = "chat?chatId={chatId}",
@@ -45,8 +43,7 @@ fun RootNavGraph(
             val chatId = backStackEntry.arguments?.getInt("chatId")
             ChatScreen(
                 navController = navController,
-                chatId = if (chatId == -1) null else chatId,
-                viewModel = chatViewModel
+                chatId = if (chatId == -1) null else chatId
             )
         }
         composable("location") {
