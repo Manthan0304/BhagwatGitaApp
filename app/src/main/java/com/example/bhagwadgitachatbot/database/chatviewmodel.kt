@@ -27,6 +27,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private var _currentChatId = MutableStateFlow<Int?>(null)
     val currentChatId: StateFlow<Int?> = _currentChatId.asStateFlow()
 
+    private var _justCreatedNewChat = MutableStateFlow(false)
+    val justCreatedNewChat: StateFlow<Boolean> = _justCreatedNewChat.asStateFlow()
+
     init {
         // Observe all chats
         viewModelScope.launch {
@@ -57,6 +60,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     isUser = false
                 )
             )
+
+            // Set the flag to indicate a new chat was just created
+            _justCreatedNewChat.value = true
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -64,6 +70,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadChat(chatId: Int) = viewModelScope.launch {
         _currentChatId.value = chatId
+        _justCreatedNewChat.value = false  // Reset the flag when loading an existing chat
 
         // Fetch and convert messages for this chat
         messageDao.getMessagesForChat(chatId).collect { messages ->
@@ -105,8 +112,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         if (chatId != null) {
             // Load existing chat
             loadChat(chatId)
-        } else {
-            // Create new chat
+        } else if (!_justCreatedNewChat.value) {
+            // Create new chat only if one wasn't just created
             createNewChat()
         }
     }
@@ -126,6 +133,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             _chatsState.value = emptyList()
             _currentChatMessages.value = emptyList()
             _currentChatId.value = null
+            _justCreatedNewChat.value = false
         } catch (e: Exception) {
             e.printStackTrace()
             // You might want to handle the error or propagate it to the UI

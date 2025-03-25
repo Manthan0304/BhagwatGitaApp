@@ -62,7 +62,6 @@ fun HomeScreen(navController: NavHostController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    chatViewModel.createNewChat("New Conversation")
                     navController.navigate("chat")
                 },
                 containerColor = Color(0xFFFFD700),

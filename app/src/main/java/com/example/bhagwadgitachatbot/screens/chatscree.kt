@@ -59,15 +59,16 @@ fun ChatScreen(
     // Collect messages from ViewModel
     val messages by viewModel.currentChatMessages.collectAsState()
     val currentChatId by viewModel.currentChatId.collectAsState()
+    val justCreatedNewChat by viewModel.justCreatedNewChat.collectAsState()
 
     // Initialize chat and load messages
     LaunchedEffect(chatId) {
         if (chatId != null) {
             // Load existing chat
             viewModel.loadChat(chatId)
-        } else if (currentChatId == null) {
-            // Only create new chat if we don't have a current chat ID
-            viewModel.createNewChat("Hello! I'm your Bhagavad Gita assistant. How can I help you today?")
+        } else {
+            // Create new chat with welcome message
+            viewModel.createNewChat("Welcome to GitaVaani! I'm your spiritual guide through the teachings of the Bhagavad Gita. How can I help you today?")
         }
     }
 
