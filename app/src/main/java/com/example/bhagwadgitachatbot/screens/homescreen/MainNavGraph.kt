@@ -2,6 +2,10 @@ package com.example.bhagwadgitachatbot
 import android.app.Application
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,12 +43,40 @@ fun MainNavGraph(
         navController = navController,
         startDestination = BottomNav.Screen1.route
     ) {
-        composable(BottomNav.Screen1.route) {
+        composable(
+            route = BottomNav.Screen1.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) {
             HomeScreen(
                 navController = rootNavController
             )  // Use rootNavController for chat navigation
         }
-        composable(BottomNav.Screen2.route) {
+        composable(
+            route = BottomNav.Screen2.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) {
             LocationScreen(navController = rootNavController)  // Use rootNavController for sign out
         }
     }

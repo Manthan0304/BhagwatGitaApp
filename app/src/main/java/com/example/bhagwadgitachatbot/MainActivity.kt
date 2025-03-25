@@ -15,7 +15,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.example.bhagwadgitachatbot.screens.ChatScreen
 import com.example.bhagwadgitachatbot.screens.LoginScreen
-import com.example.bhagwadgitachatbot.ui.theme.BhagwadgitachatbotTheme
+import com.example.bhagwadgitachatbot.ui.theme.GitaVaaniTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 systemUiController.setNavigationBarColor(color = Color.Transparent)
             }
 
-            BhagwadgitachatbotTheme {
+            GitaVaaniTheme {
                 val launcher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.StartIntentSenderForResult(),
                     onResult = { result ->
