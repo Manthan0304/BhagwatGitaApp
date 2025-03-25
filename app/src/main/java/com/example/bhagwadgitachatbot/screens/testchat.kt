@@ -1,7 +1,5 @@
 package com.example.bhagwadgitachatbot.screens
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,7 +9,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,22 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import androidx.navigation.NavHostController
-import com.example.bhagwadgitachatbot.ui.theme.customFont
-import com.example.bhagwadgitachatbot.api.ChatRequest
-import com.example.bhagwadgitachatbot.api.RetrofitInstance
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(navController: NavHostController) {
-    var userInput by remember { mutableStateOf("") }
-    val chatMessages = remember { mutableStateListOf<Pair<String, Boolean>>() }
+fun TestChatScreen(navController: NavHostController) {
+    var msg by remember { mutableStateOf("") }
+    val messages = remember { mutableStateListOf<Pair<String, Boolean>>() }
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
 
@@ -44,10 +35,9 @@ fun ChatScreen(navController: NavHostController) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Bhagavad Gita Chatbot",
+                        text = "Bhagavad Gita Chatbottt",
                         color = Color(0xFFFFD700),
-                        fontSize = 22.sp,
-                        fontFamily = customFont
+                        fontSize = 22.sp
                     )
                 },
                 navigationIcon = {
@@ -76,13 +66,13 @@ fun ChatScreen(navController: NavHostController) {
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Chat messages area
+                // Messages area
                 Box(modifier = Modifier.weight(1f)) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         reverseLayout = false
                     ) {
-                        items(chatMessages) { message ->
+                        items(messages) { message ->
                             ChatBubble(message.first, message.second)
                         }
                     }
@@ -91,7 +81,6 @@ fun ChatScreen(navController: NavHostController) {
                         Text(
                             text = "AI is thinking...",
                             color = Color.Gray,
-                            fontFamily = customFont,
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
                                 .padding(8.dp)
@@ -108,16 +97,10 @@ fun ChatScreen(navController: NavHostController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextField(
-                        value = userInput,
-                        onValueChange = { userInput = it },
+                        value = msg,
+                        onValueChange = { msg = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { 
-                            Text(
-                                "Ask Bhagavad Gita...", 
-                                color = Color.Gray,
-                                fontFamily = customFont
-                            ) 
-                        },
+                        placeholder = { Text("Ask Bhagavad Gita...", color = Color.Gray) },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
@@ -127,26 +110,34 @@ fun ChatScreen(navController: NavHostController) {
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
                         keyboardActions = KeyboardActions(
                             onSend = {
-                                sendMessage(
-                                    userInput,
-                                    chatMessages,
-                                    coroutineScope,
-                                    { isLoading = it },
-                                    { userInput = "" }
-                                )
+                                if (msg.isNotBlank()) {
+                                    messages.add(msg to true)
+                                    val userMessage = msg
+                                    msg = ""
+                                    coroutineScope.launch {
+                                        isLoading = true
+                                        val response = fetchTestAIResponse(userMessage)
+                                        isLoading = false
+                                        messages.add(response to false)
+                                    }
+                                }
                             }
                         )
                     )
 
                     IconButton(
                         onClick = {
-                            sendMessage(
-                                userInput,
-                                chatMessages,
-                                coroutineScope,
-                                { isLoading = it },
-                                { userInput = "" }
-                            )
+                            if (msg.isNotBlank()) {
+                                messages.add(msg to true)
+                                val userMessage = msg
+                                msg = ""
+                                coroutineScope.launch {
+                                    isLoading = true
+                                    val response = fetchTestAIResponse(userMessage)
+                                    isLoading = false
+                                    messages.add(response to false)
+                                }
+                            }
                         }
                     ) {
                         Icon(
@@ -161,80 +152,7 @@ fun ChatScreen(navController: NavHostController) {
     }
 }
 
-fun sendMessage(
-    userInput: String,
-    chatMessages: MutableList<Pair<String, Boolean>>,
-    coroutineScope: CoroutineScope,
-    setLoading: (Boolean) -> Unit,
-    clearInput: () -> Unit
-) {
-    if (userInput.isNotBlank()) {
-        chatMessages.add(userInput to true)
-        clearInput()
-
-        coroutineScope.launch {
-            setLoading(true)
-            val aiReply = fetchAIResponse(userInput)
-            setLoading(false)
-            chatMessages.add(aiReply to false)
-        }
-    }
-}
-
-suspend fun fetchAIResponse(userMessage: String): String {
-    return try {
-        val response = RetrofitInstance.api.getChatResponse(ChatRequest(userMessage))
-        if (response.isSuccessful) {
-            response.body()?.response ?: "Sorry, I couldn't process that."
-        } else {
-            "Sorry, there was an error processing your request."
-        }
-    } catch (e: Exception) {
-        "Sorry, there was an error: ${e.localizedMessage}"
-    }
-}
-
-@Composable
-fun ChatBubble(message: String, isUser: Boolean) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
-    ) {
-        Box(
-            modifier = Modifier
-                .background(
-                    color = if (isUser) Color(0xFF3B5998) else Color(0xFFFFD700),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .padding(12.dp)
-        ) {
-            Text(
-                text = message,
-                color = if (isUser) Color.White else Color.Black,
-                fontSize = 16.sp
-            )
-        }
-    }
-}
-
-@Composable
-fun MenuButton(text: String) {
-    Button(
-        onClick = { /* Handle menu item click */ },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start
-        )
-    }
+private suspend fun fetchTestAIResponse(userMessage: String): String {
+    kotlinx.coroutines.delay(1000) // Simulate API call
+    return "This is a test response to: $userMessage"
 }

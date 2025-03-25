@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,31 +52,24 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(bottom = 90.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-            Text(
-                text = "Bhagavad Gita",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFD700)
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
             Button(
                 onClick = { onSignInClick() },
                 modifier = Modifier
-                    .width(200.dp)
-                    .height(48.dp),
+                    .width(250.dp)
+                    .height(45.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD700)),
                 shape = RoundedCornerShape(24.dp)
             ) {
                 Text(
-                    text = "Chat In",
+                    text = "Start Chat",
                     color = Color(0xFF1A237E),
-                    fontSize = 18.sp
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Serif
                 )
             }
         }
