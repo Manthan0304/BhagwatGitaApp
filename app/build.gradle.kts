@@ -92,5 +92,6 @@ dependencies {
     implementation("io.coil-kt:coil-gif:2.6.0") // GIF support
     implementation("io.coil-kt:coil-compose:2.6.0") // For Jetpack Compose
 
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
 }

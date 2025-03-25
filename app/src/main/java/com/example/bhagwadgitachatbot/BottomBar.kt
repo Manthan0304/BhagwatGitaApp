@@ -33,11 +33,11 @@ fun BottomBar(navController: NavHostController) {
         screens.forEach { screen ->
             BottomNavigationItem(
                 icon = { Icon(screen.icon, contentDescription = screen.title) },
-                label = { 
+                label = {
                     Text(
                         screen.title,
                         fontFamily = customFont
-                    ) 
+                    )
                 },
                 selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                 onClick = {
@@ -63,7 +63,7 @@ sealed class BottomNav(
         title = "Home",
         icon = Icons.Default.Home
     )
-    
+
     object Screen2 : BottomNav(
         route = "location_screen",
         title = "Location",

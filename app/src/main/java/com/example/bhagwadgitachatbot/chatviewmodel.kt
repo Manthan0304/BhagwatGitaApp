@@ -29,7 +29,7 @@ class chatviewmodel : ViewModel() {
                     Log.e("Firestore", "Error fetching user data", error)
                     return@addSnapshotListener
                 }
-                
+
                 if (value != null && value.exists()) {
                     val username = value.getString("username") ?: ""
                     val email = value.getString("email") ?: ""

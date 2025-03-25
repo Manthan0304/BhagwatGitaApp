@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    private const val BASE_URL = "YOUR_NGROK_URL/" // Replace with your ngrok URL
+    private const val BASE_URL = "http://35.244.5.153:8000/"
 
     private val retrofit by lazy {
         Retrofit.Builder()

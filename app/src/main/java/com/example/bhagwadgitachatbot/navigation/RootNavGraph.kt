@@ -1,5 +1,7 @@
 package com.example.bhagwadgitachatbot.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -8,8 +10,8 @@ import com.example.bhagwadgitachatbot.LocationScreen
 import com.example.bhagwadgitachatbot.screens.ChatScreen
 import com.example.bhagwadgitachatbot.screens.LoginScreen
 import com.example.homescreenbg.MainScreen
-import com.example.bhagwadgitachatbot.screens.TestChatScreen
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun RootNavGraph(
     navController: NavHostController,
@@ -29,9 +31,6 @@ fun RootNavGraph(
         }
         composable("chat") {
             ChatScreen(navController)
-        }
-        composable("test_chat") {
-            TestChatScreen(navController)
         }
         composable("location") {
             LocationScreen(navController)

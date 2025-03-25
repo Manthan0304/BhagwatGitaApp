@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
+import com.example.bhagwadgitachatbot.ui.components.DynamicText
 import com.example.bhagwadgitachatbot.ui.theme.customFont
 import com.google.firebase.auth.FirebaseAuth
 
@@ -269,35 +270,6 @@ fun LocationScreen(navController: NavHostController) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Notifications
-                    SettingCard(
-                        title = "Notifications",
-                        icon = Icons.Default.Notifications
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                "Enable Notifications",
-                                color = Color.White,
-                                fontFamily = customFont,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Switch(
-                                checked = notificationsEnabled,
-                                onCheckedChange = { notificationsEnabled = it },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color(0xFF3B5998),
-                                    checkedTrackColor = Color(0xFF8B9DC3)
-                                )
-                            )
-                        }
-                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -319,30 +291,18 @@ fun LocationScreen(navController: NavHostController) {
                             fontFamily = customFont,
                             modifier = Modifier.padding(top = 4.dp)
                         )
-                        Text(
+                        DynamicText(
                             "This app provides spiritual guidance through AI-powered conversations based on the teachings of Bhagavad Gita.",
                             color = Color.White,
                             fontFamily = customFont,
                             modifier = Modifier.padding(top = 8.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(40.dp))
 
-                        Button(
-                            onClick = {
-                                // Open privacy policy or terms
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF3B5998)
-                            ),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        ) {
-                            Text("Privacy Policy", color = Color.White, fontFamily = customFont)
-                        }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(50.dp))
                 }
             }
         }
@@ -375,7 +335,7 @@ fun SettingCard(
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
-                Text(
+                DynamicText(
                     title,
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontFamily = customFont
@@ -389,5 +349,3 @@ fun SettingCard(
         }
     }
 }
-
-

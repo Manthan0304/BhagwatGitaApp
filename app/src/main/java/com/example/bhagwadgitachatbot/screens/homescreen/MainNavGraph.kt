@@ -34,10 +34,10 @@ fun MainNavGraph(
         navController = navController,
         startDestination = BottomNav.Screen1.route
     ) {
-        composable(BottomNav.Screen1.route) { 
+        composable(BottomNav.Screen1.route) {
             HomeScreen(navController = rootNavController)  // Use rootNavController for chat navigation
         }
-        composable(BottomNav.Screen2.route) { 
+        composable(BottomNav.Screen2.route) {
             LocationScreen(navController = rootNavController)  // Use rootNavController for sign out
         }
     }

@@ -1,18 +1,15 @@
 package com.example.bhagwadgitachatbot
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,22 +22,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import coil.compose.rememberImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import com.example.bhagwadgitachatbot.ui.theme.customFont
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
@@ -65,43 +59,59 @@ fun HomeScreen(navController: NavHostController) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Background Galaxy GIF using AsyncImage
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(R.drawable.galaxy)
-                .build(),
-            contentDescription = "Background GIF",
-            imageLoader = imageLoader,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Recent Chats",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontFamily = customFont
-                ),
-                fontSize = 40.sp,
-                color = Color.White,
-                fontWeight = FontWeight.ExtraBold
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate("chat") },
+                containerColor = Color(0xFFFFD700),
+                contentColor = Color.Black,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.padding(bottom = 100.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "New Chat",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Background Galaxy GIF using AsyncImage
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(R.drawable.galaxy)
+                    .build(),
+                contentDescription = "Background GIF",
+                imageLoader = imageLoader,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Recent Chats",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = customFont
+                    ),
+                    fontSize = 40.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.ExtraBold
+                )
 
-            val recentChats = listOf("Test Chat", "Chat 2", "Chat 3", "Chat 4")
-            LazyColumn {
-                items(recentChats) { chatName ->
-                    ChatCard(chatName = chatName) {
-                        if (chatName == "Test Chat") {
-                            navController.navigate("test_chat")
-                        } else {
+                Spacer(modifier = Modifier.height(20.dp))
+
+                val recentChats = listOf("Chat 2", "Chat 3", "Chat 4")
+                LazyColumn {
+                    items(recentChats) { chatName ->
+                        ChatCard(chatName = chatName) {
                             navController.navigate("chat")
                         }
                     }
@@ -110,22 +120,6 @@ fun HomeScreen(navController: NavHostController) {
         }
     }
 }
-
-fun fetchUsernameFromFirebase(onResult: (String) -> Unit) {
-    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-    val db = FirebaseFirestore.getInstance()
-
-    db.collection("users").document(userId)
-        .get()
-        .addOnSuccessListener { document ->
-            val name = document.getString("username") ?: "User"
-            onResult(name) // Update UI
-        }
-        .addOnFailureListener {
-            onResult("User") // Handle error
-        }
-}
-
 
 @Composable
 fun ChatCard(chatName: String, onClick: () -> Unit) {
@@ -176,26 +170,3 @@ fun ChatCard(chatName: String, onClick: () -> Unit) {
     }
 }
 
-@Composable
-fun BottomNavigationBar() {
-    NavigationBar(containerColor = Color.Black) {
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home", tint = Color.White) },
-            label = { Text("Home", color = Color.White) }
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.Home, contentDescription = "Chat", tint = Color.White) },
-            label = { Text("Chat", color = Color.White) }
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White) },
-            label = { Text("Settings", color = Color.White) }
-        )
-    }
-}
