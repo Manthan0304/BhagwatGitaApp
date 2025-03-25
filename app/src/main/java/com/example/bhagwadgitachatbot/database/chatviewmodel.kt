@@ -118,6 +118,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 messageDao.deleteAllMessages()
                 // Then delete all chats
                 chatDao.deleteAllChats()
+                // Reset the chat sequence so new chats start from 1 again
+                chatDao.resetChatSequence()
             }
             
             // Update states in the main thread

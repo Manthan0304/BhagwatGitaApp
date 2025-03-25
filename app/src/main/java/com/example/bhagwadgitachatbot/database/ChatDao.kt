@@ -17,6 +17,9 @@ interface ChatDao {
     @Query("DELETE FROM chats")
     suspend fun deleteAllChats()
 
+    @Query("UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'chats'")
+    suspend fun resetChatSequence()
+
     @Query("UPDATE chats SET last_message = :lastMessage WHERE id = :chatId")
     suspend fun updateChat(chatId: Int, lastMessage: String)
 }

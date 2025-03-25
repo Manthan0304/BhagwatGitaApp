@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 import com.example.bhagwadgitachatbot.R
 
 val customFont = FontFamily(
-    Font(R.font.dancingscript) // Replace 'your_font_name' with your actual font file name
+    Font(R.font.spacegrotesk)
 )
 
 val Typography = Typography(
