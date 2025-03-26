@@ -23,14 +23,27 @@ import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.request.ImageRequest
 import com.example.bhagwadgitachatbot.R
+import com.example.bhagwadgitachatbot.services.MusicService
 
 @Preview(showBackground = true)
 @Composable
 fun LoginScreen(
     onSignInClick: () -> Unit = {}
-
 ) {
     val context = LocalContext.current
+    val musicService = remember { MusicService.getInstance(context) }
+
+    // Start music when the screen is composed
+    LaunchedEffect(Unit) {
+        musicService.startMusic()
+    }
+
+    // Cleanup when the screen is disposed
+    DisposableEffect(Unit) {
+        onDispose {
+            musicService.stopMusic()
+        }
+    }
 
     val imageLoader = ImageLoader.Builder(context)
         .components {
@@ -57,7 +70,10 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Bottom
         ) {
             Button(
-                onClick = { onSignInClick() },
+                onClick = { 
+                    musicService.stopMusic()
+                    onSignInClick() 
+                },
                 modifier = Modifier
                     .width(250.dp)
                     .height(45.dp),
@@ -68,7 +84,7 @@ fun LoginScreen(
                     text = "Start Chat",
                     color = Color(0xFF1A237E),
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
+                       fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Serif
                 )
             }
