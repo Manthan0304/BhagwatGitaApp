@@ -1,3 +1,5 @@
+APK Link - https://drive.google.com/drive/folders/100qVNyt_xcOX3lKDBjXW1VxsF7C9c-04?usp=drive_link
+
 # BhagwatGita Chatbot
 
 BhagwatGita Chatbot is an AI-powered chatbot designed to provide users with insights and teachings from the Bhagavad Gita. Built using Kotlin, the app leverages a **Retrieval-Augmented Generation (RAG) model** to fetch relevant answers from a curated knowledge base and generate context-aware responses.
