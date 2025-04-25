@@ -12,7 +12,7 @@ BhagwatGita Chatbot is an AI-powered chatbot designed to provide users with insi
 - **Multi-language Support**: Provides responses in English and Sanskrit (planned feature).
  
 ## Tech Stack
-- **Language**: Kotlin
+- **Language**: Kotlin 
 - **Framework**: Jetpack Compose
 - **AI Model**: RAG (Retrieval-Augmented Generation)
 - **Backend**: Firebase Firestore (for storing user interactions)
